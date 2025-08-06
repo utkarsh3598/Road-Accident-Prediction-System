@@ -1,10 +1,6 @@
-import joblib
 import pandas as pd
 
-# Load encoders
-encoders = joblib.load("encoders.joblib")
-
-def preprocess_input(df: pd.DataFrame) -> pd.DataFrame:
+def preprocess_input(df: pd.DataFrame, encoders: dict) -> pd.DataFrame:
     df = df.copy()
     df.columns = df.columns.str.strip().str.lower().str.replace(" ", "_")
 
