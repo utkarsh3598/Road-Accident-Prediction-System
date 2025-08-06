@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import joblib
 import pandas as pd
-from preprocess_input import preprocess_input
+from preprocess import preprocess
 
 # Load model and encoders
 model = joblib.load("accident_severity_model.joblib")
