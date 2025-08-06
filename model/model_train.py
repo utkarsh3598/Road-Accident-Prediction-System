@@ -2,12 +2,13 @@ import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
-from sklearn.metrics import classification_report
+from sklearn.metrics import classification_report, ConfusionMatrixDisplay
+import matplotlib.pyplot as plt
 import joblib
 import os
 
 # --- Configuration ---
-DATA_PATH = r"C:\Users\utkar\Desktop\Project Topics\Real-Time Road Accident Alert System\data\RTA Dataset.csv"
+DATA_PATH = r"C:\Users\utkar\Desktop\Project Topics\Road-Accident-Prediction-System\data\Balanced_RTA_Dataset.csv"
 MODEL_PATH = "accident_severity_model.joblib"
 ENCODER_PATH = "encoders.joblib"
 
@@ -81,6 +82,15 @@ print(f"📉 Test Accuracy: {test_acc:.2%}")
 # Detailed report
 y_pred = model.predict(X_test)
 print("🧾 Classification Report:\n", classification_report(y_test, y_pred, target_names=target_encoder.classes_))
+
+# --- Step 9.1: Confusion Matrix ---
+ConfusionMatrixDisplay.from_estimator(
+    model, X_test, y_test,
+    display_labels=target_encoder.classes_,
+    cmap='Blues'
+)
+plt.title("Confusion Matrix")
+plt.show()
 
 # --- Step 10: Save model and encoders ---
 joblib.dump(model, MODEL_PATH)
