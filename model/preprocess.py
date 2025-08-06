@@ -1,18 +1,32 @@
 import pandas as pd
+import joblib
 
-def preprocess(df: pd.DataFrame, encoders: dict) -> pd.DataFrame:
-    df = df.copy()
-    df.columns = df.columns.str.strip().str.lower().str.replace(" ", "_")
+# Load encoders
+ENCODER_PATH = "encoders.joblib"
+encoders = joblib.load(ENCODER_PATH)
 
+def preprocess(input_df):
+    """
+    Preprocess input data using saved encoders.
+    Handles missing values and encodes categorical columns.
+    """
+    # Normalize column names
+    input_df.columns = input_df.columns.str.strip().str.lower().str.replace(" ", "_")
+
+    # Fill missing values
+    input_df.fillna("Unknown", inplace=True)
+
+    # Apply label encoding
     for col, encoder in encoders.items():
-        if col == "__target__":
+        if col == '__target__':
             continue  # Skip target encoder
 
-        if col not in df.columns:
-            raise ValueError(f"Missing expected column: {col}")
+        if col not in input_df.columns:
+            raise ValueError(f"Column '{col}' is missing from input.")
 
-        known_classes = list(encoder.classes_)
-        df[col] = df[col].apply(lambda x: x if x in known_classes else known_classes[0])
-        df[col] = encoder.transform(df[col])
+        # Encode using saved encoder, handle unseen values
+        input_df[col] = input_df[col].apply(
+            lambda x: encoder.transform([x])[0] if x in encoder.classes_ else -1
+        )
 
-    return df
+    return input_df
