@@ -46,6 +46,9 @@ if missing_cols:
 X = df[features].copy()
 y = df[target].copy()
 
+# --- Step 5.1: Handle Missing Values ---
+X.fillna("Unknown", inplace=True)
+
 # --- Step 6: Encode categorical features ---
 encoders = {}
 for col in X.columns:
@@ -57,7 +60,7 @@ print("✅ Features encoded.")
 # Encode target
 target_encoder = LabelEncoder()
 y = target_encoder.fit_transform(y)
-encoders['__target__'] = target_encoder  # save target encoder
+encoders['__target__'] = target_encoder  # Save target encoder
 
 # --- Step 7: Train/Test Split ---
 X_train, X_test, y_train, y_test = train_test_split(
