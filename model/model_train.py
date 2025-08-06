@@ -8,7 +8,7 @@ import joblib
 import os
 
 # --- Configuration ---
-DATA_PATH = r"C:\Users\utkar\Desktop\Project Topics\Road-Accident-Prediction-System\data\Balanced_RTA_Dataset.csv"
+DATA_PATH = r"C:\Users\utkar\Desktop\Project Topics\Road-Accident-Prediction-System\data\RTA Dataset.csv"
 MODEL_PATH = "accident_severity_model.joblib"
 ENCODER_PATH = "encoders.joblib"
 
