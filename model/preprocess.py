@@ -1,13 +1,9 @@
 import joblib
 import pandas as pd
 
-def preprocess(df: pd.DataFrame) -> pd.DataFrame:
-    df = df.copy()
-    df.columns = df.columns.str.strip().str.lower().str.replace(" ", "_")
-
-    # Load encoders internally
+def preprocess(df):
+    # Load encoders from file
     encoders = joblib.load("encoders.joblib")
-
     for col, encoder in encoders.items():
         if col == "__target__":
             continue  # skip the target label encoder
