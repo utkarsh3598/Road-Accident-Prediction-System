@@ -1,45 +1,62 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-import joblib
 import pandas as pd
-from preprocess import preprocess_input
+import joblib
+import traceback
 
-app = Flask(__name__)
-CORS(app)  # Enable CORS for all domains
-
-# Load model and encoders
+# --- Load model and encoders ---
 model = joblib.load("accident_severity_model.joblib")
+encoders = joblib.load("encoders.joblib")  # includes target encoder as '__target__'
 
-@app.route("/")
-def home():
-    return "✅ Road Accident Severity Prediction API is running."
+# --- Flask App ---
+app = Flask(__name__)
+CORS(app)
 
+# --- Helper: Preprocess Input ---
+def preprocess_input(data: dict) -> pd.DataFrame:
+    df = pd.DataFrame([data])
+    df.columns = df.columns.str.strip().str.lower().str.replace(" ", "_")
+    
+    for col, encoder in encoders.items():
+        if col == '__target__':
+            continue  # Skip target encoder
+
+        if col not in df.columns:
+            raise ValueError(f"Missing expected column: {col}")
+
+        # Handle unseen labels
+        valid_classes = list(encoder.classes_)
+        df[col] = df[col].apply(lambda x: x if x in valid_classes else valid_classes[0])
+        df[col] = encoder.transform(df[col].astype(str))
+    
+    return df
+
+# --- Route: Predict Accident Severity ---
 @app.route("/predict", methods=["POST"])
 def predict():
     try:
-        # Parse JSON
         data = request.get_json()
-        if not data:
-            return jsonify({"error": "No input data provided"}), 400
 
-        # Create DataFrame
-        input_df = pd.DataFrame([data])
-
-        # Preprocess
-        processed_input = preprocess_input(input_df)
+        # Preprocess input
+        input_df = preprocess_input(data)
 
         # Predict
-        prediction = model.predict(processed_input)[0]
+        prediction = model.predict(input_df)[0]
 
-        return jsonify({
-            "prediction": prediction
-        })
+        # Decode label
+        severity_label = encoders['__target__'].inverse_transform([prediction])[0]
 
-    except ValueError as ve:
-        return jsonify({"error": f"❌ Error in prediction: {str(ve)}"}), 400
+        return jsonify({"prediction": severity_label})
 
     except Exception as e:
-        return jsonify({"error": f"❌ Unexpected error: {str(e)}"}), 500
+        error_trace = traceback.format_exc()
+        return jsonify({"error": f"❌ Error in prediction: {str(e)}", "trace": error_trace}), 400
 
+# --- Default Route ---
+@app.route("/", methods=["GET"])
+def home():
+    return "✅ Road Accident Severity Prediction API is running."
+
+# --- Run App ---
 if __name__ == "__main__":
     app.run(debug=True)
