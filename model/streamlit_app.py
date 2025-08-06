@@ -1,12 +1,20 @@
+# streamlit_app.py
 import streamlit as st
 import pandas as pd
 import joblib
-from preprocess import preprocess  # Make sure the filename matches
+from preprocess import preprocess
 
 # Load model and encoders
 model = joblib.load("accident_severity_model.joblib")
 encoders = joblib.load("encoders.joblib")
-target_encoder = encoders.get("accident_severity")  # ✅ corrected key
+
+# Try to find the correct label encoder for the target
+# Try multiple common keys as fallback
+target_encoder = (
+    encoders.get("accident_severity")
+    or encoders.get("__target__")
+    or encoders.get("target")
+)
 
 # Page configuration
 st.set_page_config(page_title="Accident Severity Predictor", page_icon="🚨")
@@ -39,9 +47,13 @@ if submit:
 
     try:
         df_input = pd.DataFrame([input_data])
-        processed = preprocess(df_input, encoders)
+        processed = preprocess_input(df_input)
         prediction = model.predict(processed)[0]
-        prediction_label = target_encoder.inverse_transform([prediction])[0]
+
+        if target_encoder is not None:
+            prediction_label = target_encoder.inverse_transform([prediction])[0]
+        else:
+            prediction_label = prediction  # fallback if encoder missing
 
         st.success(f"🟢 Predicted Accident Severity: **{prediction_label}**")
     except Exception as e:
