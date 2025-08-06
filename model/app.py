@@ -9,7 +9,7 @@ model = joblib.load("accident_severity_model.joblib")
 encoders = joblib.load("encoders.joblib")
 
 # Load label encoder for target to decode predictions
-target_encoder = encoders.get("accident_severity", None)
+target_encoder = encoders.get("__target__")  # use "__target__" if that's how you saved it
 
 app = Flask(__name__)
 CORS(app)
@@ -20,15 +20,15 @@ def predict():
         input_json = request.get_json()
         df = pd.DataFrame([input_json])
 
-        # ✅ Fix: Pass encoders explicitly
-        processed = preprocess_input(df, encoders)
+        # ✅ Use preprocess without passing encoders
+        processed = preprocess(df)
 
         prediction = model.predict(processed)[0]
 
-        if target_encoder is not None:
+        if target_encoder:
             prediction_label = target_encoder.inverse_transform([prediction])[0]
         else:
-            prediction_label = prediction  # fallback if encoder missing
+            prediction_label = prediction
 
         return jsonify({
             "status": "success",
