@@ -3,14 +3,11 @@ import joblib
 import pandas as pd
 from preprocess import preprocess_input  # your preprocessing function
 
-# Load the trained model
 model = joblib.load("accident_severity_model.joblib")
 
 st.set_page_config(page_title="Road Accident Severity Predictor", layout="centered")
 st.title("🚧 Road Accident Severity Predictor")
-st.markdown("Predict the **severity** of a road accident based on road, weather, and driver info.")
 
-# Convert numerical age to age band
 def get_age_band(age):
     if age <= 16:
         return '0-16'
@@ -27,7 +24,6 @@ def get_age_band(age):
     else:
         return '66+'
 
-# Input form
 with st.form("prediction_form"):
     st.header("Enter Accident Details")
 
@@ -56,6 +52,7 @@ with st.form("prediction_form"):
         try:
             age_band_of_driver = get_age_band(age)
 
+            # ✅ Use exact feature names as during model training
             input_df = pd.DataFrame({
                 'Weather_Conditions': [weather],
                 'Road_Type': [road_type],
@@ -63,9 +60,13 @@ with st.form("prediction_form"):
                 'Light_Conditions': [light_conditions],
                 'Speed_limit': [speed_limit],
                 'age_band_of_driver': [age_band_of_driver],
-                'road_surface_type': [road_surface_type],
-                'type_of_vehicle': [type_of_vehicle],
+                'Road_Surface_Type': [road_surface_type],
+                'Type_of_Vehicle': [type_of_vehicle],
             })
+
+            # Debugging tip (optional)
+            # st.write("Input columns:", input_df.columns.tolist())
+            # st.write("Model expects:", list(model.feature_names_in_))
 
             processed_input = preprocess_input(input_df)
             prediction = model.predict(processed_input)
