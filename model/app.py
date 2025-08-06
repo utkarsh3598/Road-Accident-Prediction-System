@@ -1,8 +1,8 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-import joblib
 import pandas as pd
-from preprocess import preprocess_input
+import joblib
+from preprocess_input import preprocess_input
 
 app = Flask(__name__)
 CORS(app)
@@ -15,19 +15,20 @@ target_encoder = encoders.get("__target__")
 @app.route("/predict", methods=["POST"])
 def predict():
     try:
-        data = request.json
-        df = pd.DataFrame([data])
-        processed = preprocess_input(df, encoders)
+        input_json = request.get_json()
+        df = pd.DataFrame([input_json])
+        processed = preprocess_input(df)
+        prediction = model.predict(processed)
 
-        prediction = model.predict(processed)[0]
-        prediction_label = target_encoder.inverse_transform([prediction])[0]
-        return jsonify({"prediction": prediction_label})
+        if target_encoder is not None:
+            predicted_label = target_encoder.inverse_transform(prediction)[0]
+        else:
+            predicted_label = str(prediction[0])
+
+        return jsonify({"prediction": predicted_label})
+
     except Exception as e:
-        return jsonify({"error": f"Error in prediction: {str(e)}"}), 400
-
-@app.route("/")
-def home():
-    return "✅ Real-Time Road Accident Alert System API is running."
+        return jsonify({"error": f"❌ Prediction failed: {str(e)}"})
 
 if __name__ == "__main__":
     app.run(debug=True)
