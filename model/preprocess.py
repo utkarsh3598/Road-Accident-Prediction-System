@@ -1,6 +1,6 @@
 import pandas as pd
 
-def preprocess_input(df: pd.DataFrame, encoders: dict) -> pd.DataFrame:
+def preprocess(df: pd.DataFrame, encoders: dict) -> pd.DataFrame:
     df = df.copy()
     df.columns = df.columns.str.strip().str.lower().str.replace(" ", "_")
 
