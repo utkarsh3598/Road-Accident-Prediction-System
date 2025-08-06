@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import joblib
-from preprocess_input import preprocess_input  # Make sure the filename matches
+from preprocess import preprocess  # Make sure the filename matches
 
 # Load model and encoders
 model = joblib.load("accident_severity_model.joblib")
@@ -39,7 +39,7 @@ if submit:
 
     try:
         df_input = pd.DataFrame([input_data])
-        processed = preprocess_input(df_input, encoders)
+        processed = preprocess(df_input, encoders)
         prediction = model.predict(processed)[0]
         prediction_label = target_encoder.inverse_transform([prediction])[0]
 
