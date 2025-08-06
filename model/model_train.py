@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
@@ -5,12 +6,14 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.metrics import classification_report, ConfusionMatrixDisplay
 import matplotlib.pyplot as plt
 import joblib
-import os
 
 # --- Configuration ---
-DATA_PATH = r"C:\Users\utkar\Desktop\Project Topics\Road-Accident-Prediction-System\data\RTA Dataset.csv"
-MODEL_PATH = "accident_severity_model.joblib"
-ENCODER_PATH = "encoders.joblib"
+# Get absolute path to the data folder relative to this script
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATA_PATH = os.path.join(BASE_DIR, 'data', 'Balanced_RTA_Dataset.csv')
+
+MODEL_PATH = os.path.join(BASE_DIR, "accident_severity_model.joblib")
+ENCODER_PATH = os.path.join(BASE_DIR, "encoders.joblib")
 
 # --- Step 1: Load Dataset ---
 try:
