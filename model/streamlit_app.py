@@ -3,12 +3,12 @@ import joblib
 import pandas as pd
 from preprocess import preprocess_input  # your preprocessing function
 
-# Load trained model
+# Load the trained model
 model = joblib.load("accident_severity_model.joblib")
 
 st.set_page_config(page_title="Road Accident Severity Predictor", layout="centered")
 st.title("🚧 Road Accident Severity Predictor")
-st.markdown("Predict the **severity** of a road accident based on accident conditions and driver info.")
+st.markdown("Predict the **severity** of a road accident based on road, weather, and driver info.")
 
 # Convert numerical age to age band
 def get_age_band(age):
@@ -44,6 +44,9 @@ with st.form("prediction_form"):
 
     with col2:
         light_conditions = st.selectbox("Light Conditions", ['Daylight', 'Darkness - lights lit', 'Darkness - no lighting'])
+        type_of_vehicle = st.selectbox("Type of Vehicle", [
+            'Car', 'Motorcycle', 'Bus', 'Truck', 'Van', 'Taxi', 'Bicycle', 'Other'
+        ])
         speed_limit = st.number_input("Speed Limit (km/h)", min_value=10, max_value=150, step=5)
         age = st.number_input("Age of Driver", min_value=10, max_value=100, value=25)
 
@@ -51,10 +54,8 @@ with st.form("prediction_form"):
 
     if submitted:
         try:
-            # Convert age to age band
             age_band_of_driver = get_age_band(age)
 
-            # Create input dataframe
             input_df = pd.DataFrame({
                 'Weather_Conditions': [weather],
                 'Road_Type': [road_type],
@@ -63,9 +64,9 @@ with st.form("prediction_form"):
                 'Speed_limit': [speed_limit],
                 'age_band_of_driver': [age_band_of_driver],
                 'road_surface_type': [road_surface_type],
+                'type_of_vehicle': [type_of_vehicle],
             })
 
-            # Preprocess and predict
             processed_input = preprocess_input(input_df)
             prediction = model.predict(processed_input)
 
