@@ -18,9 +18,10 @@ CORS(app)
 def predict():
     try:
         input_json = request.get_json()
-
         df = pd.DataFrame([input_json])
-        processed = preprocess_input(df)
+
+        # ✅ Fix: Pass encoders explicitly
+        processed = preprocess_input(df, encoders)
 
         prediction = model.predict(processed)[0]
 
