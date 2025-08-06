@@ -20,8 +20,8 @@ def predict():
         input_json = request.get_json()
         df = pd.DataFrame([input_json])
 
-        # ✅ Fix: Only pass DataFrame to preprocess
-        processed = preprocess(df)
+        # ✅ Fix: Pass encoders explicitly to preprocess
+        processed = preprocess(df, encoders)
 
         prediction = model.predict(processed)[0]
 
