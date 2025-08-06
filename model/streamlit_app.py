@@ -1,12 +1,12 @@
 import streamlit as st
 import pandas as pd
 import joblib
-from preprocess import preprocess_input
+from preprocess_input import preprocess_input  # Make sure the filename matches
 
 # Load model and encoders
 model = joblib.load("accident_severity_model.joblib")
 encoders = joblib.load("encoders.joblib")
-target_encoder = encoders.get("__target__")
+target_encoder = encoders.get("accident_severity")  # ✅ corrected key
 
 # Page configuration
 st.set_page_config(page_title="Accident Severity Predictor", page_icon="🚨")
